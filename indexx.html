@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MATEO SALAZAR — Lumberjack Tears OUT NOW</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #0b1a2e 0%, #1a2f44 30%, #2c4b6b 60%, #5b7fa5 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #skyCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 40px 20px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .artist-name {
+      font-size: clamp(3rem, 10vw, 7rem);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(255, 220, 180, 0.8), 0 0 40px rgba(255, 200, 150, 0.5), 0 0 80px rgba(255, 180, 120, 0.3), 0 4px 8px rgba(0, 0, 0, 0.5);
+      margin-bottom: 10px;
+      animation: gentleGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes gentleGlow {
+      0%, 100% { text-shadow: 0 0 20px rgba(255, 220, 180, 0.8), 0 0 40px rgba(255, 200, 150, 0.5), 0 0 80px rgba(255, 180, 120, 0.3); }
+      50% { text-shadow: 0 0 30px rgba(255, 240, 200, 1), 0 0 60px rgba(255, 210, 160, 0.7), 0 0 100px rgba(255, 190, 130, 0.5); }
+    }
+
+    .new-album-label {
+      font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .album-title {
+      font-size: clamp(2.5rem, 8vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #ffeedd;
+      text-shadow: 0 0 15px rgba(255, 200, 140, 0.9), 0 0 35px rgba(255, 170, 100, 0.5), 0 0 60px rgba(255, 140, 80, 0.3), 0 4px 8px rgba(0, 0, 0, 0.6);
+      margin-bottom: 6px;
+      line-height: 1.1;
+    }
+
+    .out-now {
+      display: inline-block;
+      font-size: clamp(1rem, 3vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
+      padding: 12px 35px;
+      margin: 20px 0 30px 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      animation: pulseBadge 3s ease-in-out infinite;
+    }
+
+    @keyframes pulseBadge {
+      0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
+      50% { box-shadow: 0 0 35px rgba(255, 220, 180, 0.5); }
+    }
+
+    .listen-btn {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: #1a2f44;
+      background: linear-gradient(135deg, #ffe8c8, #ffcc99);
+      border: none;
+      border-radius: 50px;
+      padding: 16px 45px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.4s ease;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      margin-top: 10px;
+    }
+
+    .listen-btn:hover {
+      background: linear-gradient(135deg, #fff3e0, #ffd9aa);
+      box-shadow: 0 12px 35px rgba(255, 200, 140, 0.5);
+      transform: translateY(-3px);
+    }
+
+    /* --- SECTION HEADERS --- */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.1em;
+      margin: 60px 0 30px 0;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+      position: relative;
+      z-index: 10;
+    }
+
+    /* --- OFFICIAL MERCH GRID --- */
+    .merch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      padding: 20px 10px;
+      position: relative;
+      z-index: 10;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .merch-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .merch-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .merch-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: default;
+    }
+
+    .vinyl-record {
+      width: 100%;
+      max-width: 220px;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #1a1a1a 0deg 60deg, #2a2a2a 60deg 120deg, #111 120deg 180deg, #252525 180deg 240deg, #1a1a1a 240deg 300deg, #2d2d2d 300deg 360deg);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.8);
+      position: relative;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+    }
+
+    .vinyl-record:hover {
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: 0 15px 40px rgba(255, 200, 140, 0.3), inset 0 0 40px rgba(0,0,0,0.9);
+    }
+
+    .record-label-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 35%;
+      height: 35%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    .label-lumberjack { background: radial-gradient(circle, #3d2b1f, #1a0f07); border: 2px solid #8b5a2b; }
+    .label-wanderer { background: radial-gradient(circle, #1e3a5f, #0a1628); border: 2px solid #5b7fa5; }
+    .label-antarctica { background: radial-gradient(circle, #e8f0f8, #b0c8e0); color: #1a2f44; border: 2px solid #ffffff; }
+    .label-salazar-ep { background: radial-gradient(circle, #2e1a1a, #0f0505); border: 2px solid #8b3a3a; }
+    .label-forest-fires { background: radial-gradient(circle, #4a1f0a, #1a0800); border: 2px solid #d45d1e; }
+    .label-acoustic { background: radial-gradient(circle, #f5f0e0, #d4c9a8); color: #2a1f0a; border: 2px solid #8b7a5b; }
+
+    .buy-btn {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #ffffff;
+      background: #c0392b;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 28px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    .buy-btn:hover {
+      background: #e74c3c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 80, 60, 0.4);
+    }
+
+    .merch-title {
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .merch-price {
+      color: #ffcc99;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    /* --- UPCOMING SHOWS TABLE --- */
+    .shows-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      overflow-x: auto;
+    }
+
+    .shows-table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #ffffff;
+    }
+
+    .shows-table td {
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 0.95rem;
+    }
+
+    .shows-table .date {
+      font-weight: 700;
+      color: #ffcc99;
+      white-space: nowrap;
+    }
+
+    .shows-table .venue {
+      font-weight: 400;
+    }
+
+    .shows-table .city {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.85rem;
+    }
+
+    .ticket-btn {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      background: #c0392b;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 20px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .ticket-btn:hover {
+      background: #e74c3c;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 80, 60, 0.5);
+    }
+
+    .rsvp-btn {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      background: #7f8c8d;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 20px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .rsvp-btn:hover {
+      background: #95a5a6;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(200, 200, 200, 0.4);
+    }
+
+    .shows-note {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+      margin-top: 20px;
+    }
+
+    /* --- MAILING LIST --- */
+    .mailing-section {
+      position: relative;
+      z-index: 10;
+      max-width: 500px;
+      margin: 50px auto;
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .mailing-section input[type="email"] {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      font-size: 1rem;
+      backdrop-filter: blur(10px);
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .mailing-section input[type="email"]::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .mailing-section .join-btn {
+      background: #c0392b;
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      padding: 14px 35px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .mailing-section .join-btn:hover {
+      background: #e74c3c;
+      box-shadow: 0 6px 20px rgba(255, 80, 60, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .mailing-disclaimer {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    /* --- FOOTER --- */
+    .footer {
+      position: relative;
+      z-index: 10;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      margin-top: 20px;
+      padding-bottom: 30px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="skyCanvas"></canvas>
+
+  <div class="content">
+    <div class="artist-name">MATEO SALAZAR</div>
+    <div class="new-album-label">NEW ALBUM</div>
+    <div class="album-title">Lumberjack Tears</div>
+    <div class="out-now">🪓 OUT NOW 🌲</div>
+    <a href="#" class="listen-btn">🎧 LISTEN NOW</a>
+
+    <!-- OFFICIAL MERCH -->
+    <h2 class="section-title">🪓 OFFICIAL MERCH</h2>
+    <div class="merch-grid">
+      <div class="merch-item">
+        <div class="vinyl-record">
+          <div class="record-label-center label-lumberjack">LUMBERJACK<br>TEARS</div>
+        </div>
+        <div class="merch-title">Lumberjack Tears</div>
+        <div class="merch-price">$34.99</div>
+        <button class="buy-btn">BUY VINYL</button>
+      </div>
+      <div class="merch-item">
+        <div class="vinyl-record">
+          <div class="record-label-center label-wanderer">THE<br>WANDERER</div>
+        </div>
+        <div class="merch-title">The Wanderer</div>
+        <div class="merch-price">$29.99</div>
+        <button class="buy-btn">BUY VINYL</button>
+      </div>
+      <div class="merch-item">
+        <div class="vinyl-record">
+          <div class="record-label-center label-antarctica">ANTARCTICA<br>OST</div>
+        </div>
+        <div class="merch-title">Antarctica (Original Score)</div>
+        <div class="merch-price">$39.99</div>
+        <button class="buy-btn">BUY VINYL</button>
+      </div>
+      <div class="merch-item">
+        <div class="vinyl-record">
+          <div class="record-label-center label-salazar-ep">SALAZAR<br>EP</div>
+        </div>
+        <div class="merch-title">Salazar (EP)</div>
+        <div class="merch-price">$24.99</div>
+        <button class="buy-btn">BUY VINYL</button>
+      </div>
+      <div class="merch-item">
+        <div class="vinyl-record">
+          <div class="record-label-center label-forest-fires">FOREST<br>FIRES</div>
+        </div>
+        <div class="merch-title">Forest Fires</div>
+        <div class="merch-price">$32.99</div>
+        <button class="buy-btn">BUY VINYL</button>
+      </div>
+      <div class="merch-item">
+        <div class="vinyl-record">
+          <div class="record-label-center label-acoustic">ACOUSTIC<br>SESSIONS</div>
+        </div>
+        <div class="merch-title">Acoustic Sessions Vol.1</div>
+        <div class="merch-price">$27.99</div>
+        <button class="buy-btn">BUY VINYL</button>
+      </div>
+    </div>
+
+    <!-- UPCOMING SHOWS -->
+    <h2 class="section-title">🎤 UPCOMING SHOWS</h2>
+    <div class="shows-container">
+      <table class="shows-table">
+        <tr><td class="date">Aug 1, 2024</td><td class="venue">The Fillmore Silver Spring</td><td class="city">Silver Spring, MD</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 2, 2024</td><td class="venue">Franklin Music Hall</td><td class="city">Philadelphia, PA</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 4, 2024</td><td class="venue">Terminal 5</td><td class="city">New York, NY</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 5, 2024</td><td class="venue">Roadrunner</td><td class="city">Boston, MA</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 7, 2024</td><td class="venue">HISTORY</td><td class="city">Toronto, ON</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 8, 2024</td><td class="venue">Agora Theatre</td><td class="city">Cleveland, OH</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 9, 2024</td><td class="venue">Royal Oak Music Theatre</td><td class="city">Royal Oak, MI</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 11, 2024</td><td class="venue">The Salt Shed</td><td class="city">Chicago, IL</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 12, 2024</td><td class="venue">The Fillmore Minneapolis</td><td class="city">Minneapolis, MN</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 14, 2024</td><td class="venue">Boulder Theater</td><td class="city">Boulder, CO</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 15, 2024</td><td class="venue">The Complex</td><td class="city">Salt Lake City, UT</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 17, 2024</td><td class="venue">Roseland Theater</td><td class="city">Portland, OR</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 18, 2024</td><td class="venue">Showbox SoDo</td><td class="city">Seattle, WA</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 21, 2024</td><td class="venue">Quarry Amphitheater</td><td class="city">Santa Cruz, CA</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 22, 2024</td><td class="venue">Fox Theater</td><td class="city">Oakland, CA</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 23, 2024</td><td class="venue">Hollywood Palladium</td><td class="city">Los Angeles, CA</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 25, 2024</td><td class="venue">The Van Buren</td><td class="city">Phoenix, AZ</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 27, 2024</td><td class="venue">The Bomb Factory</td><td class="city">Dallas, TX</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Aug 28, 2024</td><td class="venue">Stubb's Waller Creek Amphitheater</td><td class="city">Austin, TX</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 5, 2024</td><td class="venue">Paradiso</td><td class="city">Amsterdam, Netherlands</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 6, 2024</td><td class="venue">Cirque Royal</td><td class="city">Brussels, Belgium</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 8, 2024</td><td class="venue">Carlswerk Victoria</td><td class="city">Cologne, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 9, 2024</td><td class="venue">Bataclan</td><td class="city">Paris, France</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 10, 2024</td><td class="venue">Komplex 457</td><td class="city">Zürich, Switzerland</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 12, 2024</td><td class="venue">TonHalle München</td><td class="city">Munich, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 13, 2024</td><td class="venue">Astra Kulturhaus</td><td class="city">Berlin, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 14, 2024</td><td class="venue">Docks</td><td class="city">Hamburg, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 16, 2024</td><td class="venue">Store VEGA</td><td class="city">Copenhagen, Denmark</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 18, 2024</td><td class="venue">Progresja</td><td class="city">Warsaw, Poland</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 19, 2024</td><td class="venue">STARS Auditorium</td><td class="city">Bratislava, Slovakia</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 21, 2024</td><td class="venue">Quantic Club</td><td class="city">Bucharest, Romania</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 22, 2024</td><td class="venue">Pirotska 5 Event Center</td><td class="city">Sofia, Bulgaria</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 24, 2024</td><td class="venue">SWG3 TV Studio</td><td class="city">Glasgow, UK</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 25, 2024</td><td class="venue">O2 Ritz Manchester</td><td class="city">Manchester, UK</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Sep 27, 2024</td><td class="venue">O2 Forum Kentish Town</td><td class="city">London, UK</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Oct 2, 2024</td><td class="venue">Fortitude Music Hall</td><td class="city">Brisbane, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Oct 3, 2024</td><td class="venue">Forum Melbourne</td><td class="city">Melbourne, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Oct 6, 2024</td><td class="venue">Auckland Town Hall</td><td class="city">Auckland, New Zealand</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Oct 7, 2024</td><td class="venue">Enmore Theatre</td><td class="city">Sydney, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Oct 8, 2024</td><td class="venue">Hindley Street Music Hall</td><td class="city">Adelaide, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Oct 10, 2024</td><td class="venue">Metro City</td><td class="city">Perth, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
+        <tr><td class="date">Oct 14, 2024</td><td class="venue">VENUE TBA</td><td class="city">Chengdu, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+        <tr><td class="date">Oct 16, 2024</td><td class="venue">VENUE TBA</td><td class="city">Chongqing, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+        <tr><td class="date">Oct 17, 2024</td><td class="venue">VENUE TBA</td><td class="city">Guangzhou, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+        <tr><td class="date">Oct 18, 2024</td><td class="venue">VENUE TBA</td><td class="city">Shenzhen, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+        <tr><td class="date">Oct 21, 2024</td><td class="venue">VENUE TBA</td><td class="city">Wuhan, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+        <tr><td class="date">Oct 23, 2024</td><td class="venue">VENUE TBA</td><td class="city">Shanghai, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+        <tr><td class="date">Oct 24, 2024</td><td class="venue">VENUE TBA</td><td class="city">Hangzhou, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+        <tr><td class="date">Oct 25, 2024</td><td class="venue">VENUE TBA</td><td class="city">Beijing, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
+      </table>
+      <p class="shows-note">Get notified when new events are announced in your area<br>Follow Mateo Salazar</p>
+    </div>
+
+    <!-- JOIN THE MAILING LIST -->
+    <div class="mailing-section">
+      <h3 style="margin-bottom:20px; letter-spacing:0.1em;">Join The Mailing List</h3>
+      <input type="email" placeholder="EMAIL ADDRESS">
+      <button class="join-btn">Sign Up</button>
+      <p class="mailing-disclaimer">I want Warner Music Group to send me marketing messages about Mateo Salazar. Unsubscribe at any time. Please read our Privacy Policy for more information about how we handle your personal information, including for marketing.</p>
+    </div>
+  </div>
+
+  <div class="footer">© SALAZAR RECORDS — SEPTEMBER 24, 2026</div>
+
+  <script>
+    const canvas = document.getElementById('skyCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, stars = [], clouds = [], ufo = { x: 0, y: 0 };
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      generateStars();
+      generateClouds();
+      ufo.x = width * 0.7;
+      ufo.y = height * 0.2;
+    }
+
+    function generateStars() {
+      stars = [];
+      const count = Math.floor((width * height) / 2500);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height * 0.75,
+          radius: Math.random() * 2.2 + 0.5,
+          twinkleSpeed: Math.random() * 0.02 + 0.005,
+          twinkleOffset: Math.random() * Math.PI * 2,
+          opacity: Math.random() * 0.8 + 0.4
+        });
+      }
+    }
+
+    function generateClouds() {
+      clouds = [];
+      const count = Math.floor(width / 120) + 3;
+      for (let i = 0; i < count; i++) {
+        clouds.push({
+          x: Math.random() * width,
+          y: Math.random() * height * 0.7 + height * 0.05,
+          width: Math.random() * 200 + 100,
+          height: Math.random() * 60 + 30,
+          speed: Math.random() * 0.3 + 0.08,
+          opacity: Math.random() * 0.4 + 0.2
+        });
+      }
+    }
+
+    function drawStars(time) {
+      stars.forEach(star => {
+        const twinkle = Math.sin(time * star.twinkleSpeed + star.twinkleOffset) * 0.4 + 0.6;
+        const alpha = star.opacity * twinkle;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 250, 220, ${alpha})`;
+        ctx.fill();
+        if (star.radius > 1.4) {
+          ctx.beginPath();
+          ctx.arc(star.x,
