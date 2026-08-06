@@ -1,586 +1,1128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MATEO SALAZAR — Lumberjack Tears OUT NOW</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mateo Salazar – Lumberjack Tears</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --soft-purple: #9B7ED9;
+    --red: #E10600;
+    --bg: #000;
+  }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: #fff;
+    line-height: 1.5;
+    overflow-x: hidden;
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  body.blurred { overflow: hidden; }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+  }
 
-    body {
-      width: 100%;
-      min-height: 100vh;
-      background: linear-gradient(180deg, #0b1a2e 0%, #1a2f44 30%, #2c4b6b 60%, #5b7fa5 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-      overflow-x: hidden;
-      position: relative;
-    }
+  /* BLUR OVERLAY */
+  .blur-overlay {
+    position: fixed; inset: 0; z-index: 10010;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    background: rgba(0,0,0,0.3); pointer-events: all;
+    transition: opacity 0.6s ease;
+  }
+  .blur-overlay.hidden { opacity: 0; pointer-events: none; }
 
-    #skyCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
+  /* EMAIL ERROR TOOLTIP */
+  .email-error {
+    display: none;
+    color: #E10600;
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: left;
+    padding-left: 14px;
+    letter-spacing: 0.3px;
+  }
+  .email-error.show { display: block; }
 
-    .content {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      padding: 40px 20px;
-      width: 100%;
-      max-width: 1100px;
-    }
+  .cursor {
+    position: fixed; width: 11px; height: 11px;
+    background: var(--soft-purple); border-radius: 50%;
+    pointer-events: none; z-index: 10040;
+    mix-blend-mode: screen; transform: translate(-50%, -50%);
+  }
+  .cursor-trail {
+    position: fixed; width: 26px; height: 26px;
+    border: 1.5px solid rgba(155,126,217,.4); border-radius: 50%;
+    pointer-events: none; z-index: 10039;
+    transform: translate(-50%, -50%); transition: all .11s ease-out;
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 2.5px;
+    background: linear-gradient(90deg, var(--soft-purple), var(--red));
+    width: 0%; z-index: 10002;
+    box-shadow: 0 0 10px rgba(155,126,217,.5);
+  }
 
-    .artist-name {
-      font-size: clamp(3rem, 10vw, 7rem);
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: #ffffff;
-      text-shadow: 0 0 20px rgba(255, 220, 180, 0.8), 0 0 40px rgba(255, 200, 150, 0.5), 0 0 80px rgba(255, 180, 120, 0.3), 0 4px 8px rgba(0, 0, 0, 0.5);
-      margin-bottom: 10px;
-      animation: gentleGlow 4s ease-in-out infinite;
-    }
+  /* RED OUTLINE FOR SECTIONS */
+  .album-section,
+  .video-section,
+  .shows-section,
+  .upcoming-section,
+  .mail-section {
+    border: 3px solid var(--red);
+    border-radius: 6px;
+    position: relative;
+    margin: 0;
+  }
+  .album-section::before,
+  .video-section::before,
+  .shows-section::before,
+  .upcoming-section::before,
+  .mail-section::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 1px solid rgba(225, 6, 0, 0.3);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 1;
+  }
 
-    @keyframes gentleGlow {
-      0%, 100% { text-shadow: 0 0 20px rgba(255, 220, 180, 0.8), 0 0 40px rgba(255, 200, 150, 0.5), 0 0 80px rgba(255, 180, 120, 0.3); }
-      50% { text-shadow: 0 0 30px rgba(255, 240, 200, 1), 0 0 60px rgba(255, 210, 160, 0.7), 0 0 100px rgba(255, 190, 130, 0.5); }
-    }
+  /* SCROLL TO TOP ARROW */
+  .scroll-to-top {
+    position: fixed; bottom: 30px; right: 30px;
+    width: 50px; height: 50px; background: var(--red); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; cursor: none;
+    opacity: 0; transform: translateY(20px); pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px rgba(225, 6, 0, 0.4);
+  }
+  .scroll-to-top.visible {
+    opacity: 1; transform: translateY(0); pointer-events: auto;
+  }
+  .scroll-to-top:hover {
+    box-shadow: 0 6px 25px rgba(225, 6, 0, 0.7); transform: translateY(-3px);
+  }
+  .scroll-to-top:active { transform: scale(0.9); }
+  .scroll-to-top::after {
+    content: ""; width: 12px; height: 12px;
+    border-left: 3px solid #fff; border-top: 3px solid #fff;
+    transform: rotate(45deg) translate(2px, 2px);
+  }
 
-    .new-album-label {
-      font-size: clamp(0.9rem, 2.5vw, 1.3rem);
-      font-weight: 400;
-      letter-spacing: 0.3em;
-      color: rgba(255, 255, 255, 0.7);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
+  /* CLICK RIPPLE */
+  .click-ripple {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 10005;
+    animation: rippleOut 0.6s ease-out forwards;
+  }
+  @keyframes rippleOut {
+    0% { width: 0; height: 0; opacity: 1; }
+    100% { width: 80px; height: 80px; opacity: 0; margin-left: -40px; margin-top: -40px; }
+  }
 
-    .album-title {
-      font-size: clamp(2.5rem, 8vw, 5.5rem);
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      color: #ffeedd;
-      text-shadow: 0 0 15px rgba(255, 200, 140, 0.9), 0 0 35px rgba(255, 170, 100, 0.5), 0 0 60px rgba(255, 140, 80, 0.3), 0 4px 8px rgba(0, 0, 0, 0.6);
-      margin-bottom: 6px;
-      line-height: 1.1;
-    }
+  /* KEYBOARD HINT */
+  .keyboard-hint {
+    position: fixed; bottom: 30px; left: 30px; z-index: 9999;
+    display: flex; gap: 8px; opacity: 0.5; transition: opacity 0.5s ease;
+  }
+  .keyboard-hint:hover { opacity: 1; }
+  .keyboard-key {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 6px; padding: 6px 10px;
+    font-size: 11px; letter-spacing: 1px; color: rgba(255,255,255,0.7);
+    pointer-events: none;
+  }
 
-    .out-now {
-      display: inline-block;
-      font-size: clamp(1rem, 3vw, 1.6rem);
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      color: #ffffff;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50px;
-      padding: 12px 35px;
-      margin: 20px 0 30px 0;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      animation: pulseBadge 3s ease-in-out infinite;
-    }
+  /* SECTION NAVIGATION DOTS */
+  .section-nav {
+    position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+    z-index: 9999; display: flex; flex-direction: column; gap: 14px;
+  }
+  .section-nav-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.3); cursor: none;
+    transition: all 0.3s ease;
+  }
+  .section-nav-dot:hover, .section-nav-dot.active {
+    background: var(--soft-purple);
+    box-shadow: 0 0 12px rgba(155,126,217,0.6); transform: scale(1.4);
+  }
 
-    @keyframes pulseBadge {
-      0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
-      50% { box-shadow: 0 0 35px rgba(255, 220, 180, 0.5); }
-    }
+  /* VIDEO ERROR */
+  .video-error-msg {
+    position: absolute; top: 12px; left: 0; right: 0;
+    text-align: center; color: #888; z-index: 1; pointer-events: none;
+  }
+  .video-error-msg .error-text {
+    font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    color: #999; margin-bottom: 2px;
+  }
+  .video-error-msg .error-subtext {
+    font-size: 10px; color: #666; letter-spacing: 1px;
+  }
 
-    .listen-btn {
-      display: inline-block;
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      color: #1a2f44;
-      background: linear-gradient(135deg, #ffe8c8, #ffcc99);
-      border: none;
-      border-radius: 50px;
-      padding: 16px 45px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.4s ease;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      margin-top: 10px;
-    }
+  /* HERO */
+  .hero {
+    position: relative; min-height: 100vh;
+    background: linear-gradient(180deg, #4a2270 0%, #3d1a5c 40%, #2a1540 100%);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; padding: 40px 20px 80px;
+    overflow: hidden; text-align: center; border: none;
+  }
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .star {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: .2; transform: scale(.7); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+  .ufo {
+    position: absolute; width: 90px; height: 50px; z-index: 4;
+    animation: bounceUfo 14s ease-in-out infinite;
+  }
+  @keyframes bounceUfo {
+    0% { left: 10%; top: 35%; transform: rotate(-3deg); }
+    15% { left: 25%; top: 30%; transform: rotate(2deg); }
+    30% { left: 45%; top: 40%; transform: rotate(-4deg); }
+    45% { left: 65%; top: 32%; transform: rotate(3deg); }
+    60% { left: 80%; top: 38%; transform: rotate(-2deg); }
+    75% { left: 55%; top: 44%; transform: rotate(4deg); }
+    90% { left: 30%; top: 34%; transform: rotate(-3deg); }
+    100% { left: 10%; top: 35%; transform: rotate(-3deg); }
+  }
+  .ufo-beam {
+    position: absolute; left: 50%; top: 70%; width: 40px; height: 120px;
+    background: linear-gradient(to bottom, rgba(100,220,255,.45), transparent);
+    transform: translateX(-50%);
+    clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%); opacity: .6;
+  }
+  .hero-name {
+    font-size: clamp(42px, 11vw, 72px); font-weight: 900;
+    letter-spacing: -1px; text-transform: uppercase;
+    margin-top: 12vh; margin-bottom: 18px; position: relative; z-index: 5;
+    opacity: 0; animation: fadeUp 1s .2s forwards;
+  }
+  .hero-links {
+    display: flex; gap: 28px; justify-content: center; flex-wrap: wrap;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    position: relative; z-index: 5; opacity: 0; animation: fadeUp 1s .45s forwards;
+  }
+  .hero-links a {
+    color: rgba(255,255,255,.85); text-decoration: none; cursor: none;
+    transition: opacity .3s;
+  }
+  .hero-links a:hover { opacity: .55; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    .listen-btn:hover {
-      background: linear-gradient(135deg, #fff3e0, #ffd9aa);
-      box-shadow: 0 12px 35px rgba(255, 200, 140, 0.5);
-      transform: translateY(-3px);
-    }
+  /* ALBUM */
+  .album-section { background: #000; padding: 90px 20px 100px; text-align: center; }
+  .album-section .label {
+    font-size: 13px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 14px; color: #888;
+  }
+  .album-title {
+    font-size: clamp(34px, 8vw, 54px); font-weight: 900;
+    line-height: 1.1; letter-spacing: -0.5px; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .album-out {
+    font-size: 15px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 42px; color: #bbb;
+  }
+  .album-cover-wrap { max-width: 480px; margin: 0 auto 42px; }
+  .album-cover {
+    width: 100%; border-radius: 4px; display: block;
+    box-shadow: 0 30px 60px rgba(0,0,0,.7);
+  }
+  .listen-btn {
+    display: inline-block; background: var(--red); color: #fff;
+    font-size: 15px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; padding: 16px 64px; text-decoration: none;
+    cursor: none; transition: opacity .3s;
+  }
+  .listen-btn:hover { opacity: .85; }
 
-    /* --- SECTION HEADERS --- */
-    .section-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: 0.1em;
-      margin: 60px 0 30px 0;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-      position: relative;
-      z-index: 10;
-    }
+  /* WHO IS */
+  .bio-section {
+    background: #000; padding: 90px 24px 100px;
+    max-width: 780px; margin: 0 auto; text-align: left;
+    border: none !important;
+  }
+  .bio-section::before { display: none !important; }
+  .bio-section h2 {
+    font-size: clamp(26px, 6vw, 38px); font-weight: 900;
+    letter-spacing: 1px; text-transform: uppercase; text-align: center;
+    margin-bottom: 40px;
+  }
+  .bio-section p {
+    font-size: 16px; line-height: 1.75; color: #ccc; margin-bottom: 22px;
+  }
+  .bio-section p:last-of-type { margin-bottom: 30px; }
+  .bio-credit {
+    font-size: 13px; color: #777; font-style: italic; text-align: right;
+  }
 
-    /* --- OFFICIAL MERCH GRID --- */
-    .merch-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 25px;
-      padding: 20px 10px;
-      position: relative;
-      z-index: 10;
-      max-width: 900px;
-      margin: 0 auto;
-    }
+  /* VIDEO */
+  .video-section { background: #000; padding: 80px 20px 100px; text-align: center; }
+  .video-frame {
+    position: relative; max-width: 720px; margin: 0 auto 32px;
+    border-radius: 6px; overflow: hidden; aspect-ratio: 16/9; background: #111;
+  }
+  .video-cover {
+    width: 100%; height: 100%; object-fit: cover; display: block; background: #1a1a1a;
+  }
+  .play-btn {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 76px; height: 76px; background: #1a73e8; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: none; transition: transform .2s; z-index: 2;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  }
+  .play-btn:hover { transform: translate(-50%, -50%) scale(1.08); }
+  .play-btn::after {
+    content: ""; width: 0; height: 0;
+    border-left: 24px solid #fff;
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent; margin-left: 5px;
+  }
+  .video-title {
+    font-size: 26px; font-weight: 900; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .video-date {
+    font-size: 14px; color: #888; letter-spacing: 1px; margin-bottom: 24px;
+  }
+  .watch-btn {
+    display: inline-block; background: var(--red); color: #fff;
+    font-size: 14px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; padding: 14px 48px; text-decoration: none;
+    cursor: none; transition: opacity .3s;
+  }
+  .watch-btn:hover { opacity: .85; }
+  .carousel-nav {
+    display: flex; justify-content: center; gap: 0; margin-top: 32px;
+    max-width: 720px; margin-left: auto; margin-right: auto;
+  }
+  .nav-arrow {
+    flex: 1; background: #1a1a1a; color: #fff; border: none;
+    padding: 14px; font-size: 18px; cursor: none; transition: background .25s;
+  }
+  .nav-arrow:hover { background: #2a2a2a; }
+  .nav-dots {
+    display: flex; justify-content: center; gap: 8px; margin-top: 18px;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #444;
+    cursor: none; transition: background .25s;
+  }
+  .dot.active { background: #fff; }
 
-    @media (max-width: 768px) {
-      .merch-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
+  /* SHOWS */
+  .shows-section { background: #000; padding: 90px 20px 60px; text-align: center; }
+  .shows-section h2 {
+    font-size: clamp(28px, 7vw, 42px); font-weight: 900;
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 55px;
+  }
+  .show-block { margin-bottom: 52px; }
+  .show-date {
+    font-size: 26px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .show-venue {
+    font-size: 14px; color: #999; letter-spacing: 1.5px;
+    text-transform: uppercase; margin-bottom: 22px; line-height: 1.55;
+  }
+  .soldout-btn {
+    display: inline-block; background: var(--red); color: #fff;
+    font-size: 14px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; padding: 14px 60px; cursor: none;
+    transition: opacity 0.25s;
+  }
+  .soldout-btn:hover { opacity: 0.85; }
+  .same-font-small {
+    font-size: 18px; font-weight: 900; letter-spacing: 1px;
+    text-transform: uppercase; line-height: 1.45; color: #ccc;
+  }
+  .thank-you { margin: 50px auto 70px; max-width: 480px; }
 
-    @media (max-width: 480px) {
-      .merch-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+  /* UPCOMING */
+  .upcoming-section { background: #000; padding: 40px 20px 100px; text-align: center; }
+  .upcoming-section h2 {
+    font-size: clamp(28px, 7vw, 42px); font-weight: 900;
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 30px;
+  }
+  .no-shows { margin-top: 10px; }
 
-    .merch-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: default;
-    }
+  /* MAIL */
+  .mail-section { background: #000; padding: 100px 20px 110px; text-align: center; }
+  .mail-section h2 {
+    font-size: clamp(28px, 8vw, 46px); font-weight: 900;
+    letter-spacing: -0.5px; text-transform: uppercase;
+    margin-bottom: 42px; line-height: 1.15;
+  }
+  .mail-input {
+    width: 100%; max-width: 380px; background: transparent;
+    border: 1.5px solid #fff; color: #fff; font-size: 15px;
+    padding: 16px 20px; text-align: center; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 20px; outline: none; cursor: none;
+  }
+  .mail-input::placeholder { color: #666; }
+  .join-btn {
+    display: block; width: 100%; max-width: 220px; margin: 0 auto 30px;
+    background: var(--red); color: #fff; font-size: 15px; font-weight: 800;
+    letter-spacing: 2px; text-transform: uppercase; padding: 16px;
+    border: none; cursor: none; transition: opacity .3s;
+  }
+  .join-btn:hover { opacity: .85; }
+  .checkbox-row {
+    max-width: 420px; margin: 0 auto; font-size: 12.5px; color: #888;
+    text-align: left; display: flex; gap: 12px; align-items: flex-start;
+    line-height: 1.55;
+  }
+  .checkbox-row input { margin-top: 4px; cursor: none; flex-shrink: 0; }
 
-    .vinyl-record {
-      width: 100%;
-      max-width: 220px;
-      aspect-ratio: 1 / 1;
-      border-radius: 50%;
-      background: conic-gradient(from 0deg, #1a1a1a 0deg 60deg, #2a2a2a 60deg 120deg, #111 120deg 180deg, #252525 180deg 240deg, #1a1a1a 240deg 300deg, #2d2d2d 300deg 360deg);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.8);
-      position: relative;
-      transition: all 0.3s ease;
-      margin-bottom: 15px;
-    }
+  /* FOUNDATION SECTION */
+  .foundation-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px; margin-top: 28px; flex-wrap: wrap;
+  }
+  .foundation-face {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%; background: #fff;
+    text-decoration: none; transition: all 0.3s ease;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3); flex-shrink: 0; padding: 5px;
+  }
+  .foundation-face:hover {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.55); transform: scale(1.1);
+  }
+  .foundation-face svg { width: 100%; height: 100%; }
+  .foundation-link-text {
+    font-size: 10px; color: #ffd700; letter-spacing: 0.5px;
+    text-decoration: none; opacity: 0.8;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    word-break: break-all; text-align: center;
+    max-width: 380px; line-height: 1.5; flex-shrink: 0;
+  }
+  .foundation-link-text:hover { opacity: 1; color: #ffe44d; }
 
-    .vinyl-record:hover {
-      transform: scale(1.05) rotate(2deg);
-      box-shadow: 0 15px 40px rgba(255, 200, 140, 0.3), inset 0 0 40px rgba(0,0,0,0.9);
-    }
+  footer {
+    background: #000; padding: 55px 20px 45px; text-align: center;
+    border-top: 1px solid #1a1a1a;
+  }
+  .socials {
+    display: flex; justify-content: center; align-items: center;
+    gap: 28px; margin-bottom: 32px; flex-wrap: wrap;
+  }
+  .socials a {
+    color: #fff; font-size: 18px; text-decoration: none; opacity: .75;
+    cursor: none; transition: opacity .3s; position: relative;
+  }
+  .socials a:hover { opacity: .45; }
+  .footer-links {
+    font-size: 11px; color: #555; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .footer-links a { color: #555; text-decoration: none; margin: 0 8px; cursor: none; }
 
-    .record-label-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 35%;
-      height: 35%;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.7rem;
-      letter-spacing: 0.05em;
-      color: #fff;
-      text-align: center;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    }
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity .9s ease, transform .9s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    .label-lumberjack { background: radial-gradient(circle, #3d2b1f, #1a0f07); border: 2px solid #8b5a2b; }
-    .label-wanderer { background: radial-gradient(circle, #1e3a5f, #0a1628); border: 2px solid #5b7fa5; }
-    .label-antarctica { background: radial-gradient(circle, #e8f0f8, #b0c8e0); color: #1a2f44; border: 2px solid #ffffff; }
-    .label-salazar-ep { background: radial-gradient(circle, #2e1a1a, #0f0505); border: 2px solid #8b3a3a; }
-    .label-forest-fires { background: radial-gradient(circle, #4a1f0a, #1a0800); border: 2px solid #d45d1e; }
-    .label-acoustic { background: radial-gradient(circle, #f5f0e0, #d4c9a8); color: #2a1f0a; border: 2px solid #8b7a5b; }
+  /* ========== COOKIE BAR ========== */
+  .cookie-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #0a0a0a; border-top: 1px solid #222;
+    padding: 14px 20px; z-index: 10020;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+    cursor: none;
+  }
+  .cookie-bar-text {
+    font-size: 12px; color: #ccc; line-height: 1.5; max-width: 820px;
+  }
+  .cookie-bar-text a { color: #fff; text-decoration: underline; cursor: none; font-weight: normal; }
+  .cookie-bar-actions {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .cookie-agree-btn {
+    background: #fff; border: none; color: #000;
+    font-size: 12px; font-weight: 700; padding: 10px 22px;
+    border-radius: 4px; cursor: none; transition: all 0.2s;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .cookie-agree-btn:hover { background: #ddd; }
+  .cookie-close-x {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid #444; background: transparent; color: #aaa;
+    font-size: 18px; display: flex; align-items: center; justify-content: center;
+    cursor: none; transition: all 0.3s ease; flex-shrink: 0;
+    opacity: 0; pointer-events: none;
+  }
+  .cookie-close-x.visible {
+    opacity: 1; pointer-events: auto;
+  }
+  .cookie-close-x:hover { background: #222; color: #fff; border-color: #666; }
 
-    .buy-btn {
-      display: inline-block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: #ffffff;
-      background: #c0392b;
-      border: none;
-      border-radius: 4px;
-      padding: 10px 28px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
+  /* ========== SIGN UP MODAL ========== */
+  .signup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10030; opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+    cursor: none;
+  }
+  .signup-overlay.show { opacity: 1; pointer-events: auto; }
+  .signup-modal {
+    background: #f5f5f5; color: #111; width: 100%;
+    max-width: 440px; border-radius: 4px; padding: 36px 32px 28px;
+    position: relative; box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    cursor: none;
+  }
+  .signup-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid #ccc; background: #fff; color: #666;
+    font-size: 18px; display: flex; align-items: center; justify-content: center;
+    cursor: none; transition: all 0.2s;
+  }
+  .signup-close:hover { background: #eee; color: #111; }
+  .signup-logo-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    width: 50px;
+    height: 50px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .signup-face {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: #fff; border: 2px solid #111;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .signup-face svg { width: 34px; height: 34px; }
+  .signup-r {
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    font-size: 16px;
+    font-weight: 900;
+    color: #111;
+    line-height: 1;
+  }
+  .signup-title {
+    text-align: center; font-size: 22px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 22px; color: #111;
+  }
+  .signup-form-group { margin-bottom: 16px; }
+  .signup-label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: #444; margin-bottom: 6px;
+  }
+  .signup-input,
+  .signup-select {
+    width: 100%; padding: 12px 14px; border: 1.5px solid #ccc;
+    border-radius: 999px; font-size: 14px; color: #111;
+    background: #fff; outline: none; transition: border-color 0.2s; cursor: none;
+  }
+  .signup-input.error { border-color: #E10600; }
+  .signup-input:focus,
+  .signup-select:focus { border-color: #111; }
+  .signup-input.error:focus { border-color: #E10600; }
+  .signup-input::placeholder { color: #999; }
+  .signup-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .signup-subscribe {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; width: 100%; margin-top: 8px; padding: 13px 20px;
+    background: transparent; border: 1.5px solid #111;
+    border-radius: 999px; font-size: 14px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase; color: #111;
+    cursor: none; transition: all 0.2s;
+  }
+  .signup-subscribe:hover { background: #111; color: #fff; }
+  .signup-subscribe .arrow {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid currentColor; display: flex;
+    align-items: center; justify-content: center; font-size: 12px;
+  }
+  .signup-agreement {
+    margin-top: 16px; font-size: 11px; color: #666;
+    text-align: center; line-height: 1.45;
+  }
+  .signup-success {
+    text-align: center; padding: 20px 10px 10px;
+  }
+  .signup-success h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #111; }
+  .signup-success p { font-size: 14px; color: #555; line-height: 1.5; }
 
-    .buy-btn:hover {
-      background: #e74c3c;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(255, 80, 60, 0.4);
-    }
-
-    .merch-title {
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 6px;
-      letter-spacing: 0.05em;
-    }
-
-    .merch-price {
-      color: #ffcc99;
-      font-weight: 500;
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-    }
-
-    /* --- UPCOMING SHOWS TABLE --- */
-    .shows-container {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
-      overflow-x: auto;
-    }
-
-    .shows-table {
-      width: 100%;
-      border-collapse: collapse;
-      color: #ffffff;
-    }
-
-    .shows-table td {
-      padding: 14px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-      font-size: 0.95rem;
-    }
-
-    .shows-table .date {
-      font-weight: 700;
-      color: #ffcc99;
-      white-space: nowrap;
-    }
-
-    .shows-table .venue {
-      font-weight: 400;
-    }
-
-    .shows-table .city {
-      color: rgba(255,255,255,0.7);
-      font-size: 0.85rem;
-    }
-
-    .ticket-btn {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: #ffffff;
-      background: #c0392b;
-      border: none;
-      border-radius: 4px;
-      padding: 8px 20px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    .ticket-btn:hover {
-      background: #e74c3c;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(255, 80, 60, 0.5);
-    }
-
-    .rsvp-btn {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: #ffffff;
-      background: #7f8c8d;
-      border: none;
-      border-radius: 4px;
-      padding: 8px 20px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    .rsvp-btn:hover {
-      background: #95a5a6;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(200, 200, 200, 0.4);
-    }
-
-    .shows-note {
-      color: rgba(255,255,255,0.6);
-      font-size: 0.9rem;
-      margin-top: 20px;
-    }
-
-    /* --- MAILING LIST --- */
-    .mailing-section {
-      position: relative;
-      z-index: 10;
-      max-width: 500px;
-      margin: 50px auto;
-      text-align: center;
-      color: #ffffff;
-    }
-
-    .mailing-section input[type="email"] {
-      width: 100%;
-      padding: 14px 20px;
-      border-radius: 30px;
-      border: 1px solid rgba(255,255,255,0.3);
-      background: rgba(0,0,0,0.4);
-      color: #fff;
-      font-size: 1rem;
-      backdrop-filter: blur(10px);
-      margin-bottom: 15px;
-      outline: none;
-    }
-
-    .mailing-section input[type="email"]::placeholder {
-      color: rgba(255,255,255,0.5);
-    }
-
-    .mailing-section .join-btn {
-      background: #c0392b;
-      color: #fff;
-      border: none;
-      border-radius: 30px;
-      padding: 14px 35px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-    }
-
-    .mailing-section .join-btn:hover {
-      background: #e74c3c;
-      box-shadow: 0 6px 20px rgba(255, 80, 60, 0.5);
-      transform: translateY(-2px);
-    }
-
-    .mailing-disclaimer {
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.5);
-      margin-top: 15px;
-      line-height: 1.5;
-    }
-
-    /* --- FOOTER --- */
-    .footer {
-      position: relative;
-      z-index: 10;
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      margin-top: 20px;
-      padding-bottom: 30px;
-      text-align: center;
-    }
-  </style>
+  .private-overlay {
+    position: fixed; inset: 0; background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 10004; opacity: 0; pointer-events: none; transition: opacity .4s;
+  }
+  .private-overlay.show { opacity: 1; pointer-events: auto; }
+  .private-msg {
+    font-size: 17px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 32px; color: #ccc;
+  }
+  .private-play {
+    width: 80px; height: 80px; background: #1a73e8; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; cursor: none;
+  }
+  .private-play::after {
+    content: ""; width: 0; height: 0;
+    border-left: 24px solid #fff;
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent; margin-left: 6px;
+  }
+  .private-close {
+    margin-top: 40px; background: transparent; border: 1px solid #444;
+    color: #888; padding: 10px 28px; font-size: 12px; letter-spacing: 1px;
+    text-transform: uppercase; cursor: none; border-radius: 4px;
+  }
+  .error-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.9);
+    backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
+    z-index: 10003; opacity: 0; pointer-events: none; transition: opacity .35s;
+  }
+  .error-overlay.show { opacity: 1; pointer-events: auto; }
+  .error-box {
+    background: #141414; border: 1px solid #2a2a2a; border-radius: 14px;
+    padding: 36px 28px; max-width: 300px; text-align: center;
+  }
+  .error-box .icon {
+    font-size: 26px; margin-bottom: 12px; animation: spin 2.5s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .error-box p { font-size: 13px; color: #888; margin-bottom: 22px; }
+  .error-box button {
+    background: #252525; color: #ccc; border: none; border-radius: 999px;
+    padding: 10px 24px; font-size: 12px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; cursor: none;
+  }
+</style>
 </head>
-<body>
-  <canvas id="skyCanvas"></canvas>
+<body class="blurred">
+<div class="blur-overlay" id="blurOverlay"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
 
-  <div class="content">
-    <div class="artist-name">MATEO SALAZAR</div>
-    <div class="new-album-label">NEW ALBUM</div>
-    <div class="album-title">Lumberjack Tears</div>
-    <div class="out-now">🪓 OUT NOW 🌲</div>
-    <a href="#" class="listen-btn">🎧 LISTEN NOW</a>
+<!-- SCROLL TO TOP -->
+<div class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()"></div>
 
-    <!-- OFFICIAL MERCH -->
-    <h2 class="section-title">🪓 OFFICIAL MERCH</h2>
-    <div class="merch-grid">
-      <div class="merch-item">
-        <div class="vinyl-record">
-          <div class="record-label-center label-lumberjack">LUMBERJACK<br>TEARS</div>
-        </div>
-        <div class="merch-title">Lumberjack Tears</div>
-        <div class="merch-price">$34.99</div>
-        <button class="buy-btn">BUY VINYL</button>
+<!-- KEYBOARD HINT -->
+<div class="keyboard-hint">
+  <span class="keyboard-key">← →</span>
+  <span class="keyboard-key">Videos</span>
+  <span class="keyboard-key">Space</span>
+  <span class="keyboard-key">Top</span>
+</div>
+
+<!-- SECTION NAVIGATION DOTS -->
+<div class="section-nav" id="sectionNav">
+  <div class="section-nav-dot" data-target="hero" title="Top"></div>
+  <div class="section-nav-dot" data-target="album" title="Album"></div>
+  <div class="section-nav-dot" data-target="bio" title="Bio"></div>
+  <div class="section-nav-dot" data-target="video" title="Videos"></div>
+  <div class="section-nav-dot" data-target="shows" title="Shows"></div>
+  <div class="section-nav-dot" data-target="upcoming" title="Upcoming"></div>
+  <div class="section-nav-dot" data-target="mail" title="Mailing List"></div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="stars" id="stars"></div>
+  <div class="ufo" id="ufo">
+    <svg viewBox="0 0 120 60" width="90">
+      <ellipse cx="60" cy="35" rx="50" ry="12" fill="#7dffb3"/>
+      <ellipse cx="60" cy="28" rx="28" ry="18" fill="#5ad4ff"/>
+      <circle cx="60" cy="22" r="10" fill="#a0f0ff"/>
+    </svg>
+    <div class="ufo-beam"></div>
+  </div>
+  <h1 class="hero-name">MATEO SALAZAR</h1>
+  <div class="hero-links">
+    <a onclick="showError()">MUSIC</a>
+    <a onclick="scrollToSection('video')">VIDEO</a>
+    <a onclick="scrollToSection('upcoming')">TOUR</a>
+    <a onclick="showError()">MERCH</a>
+  </div>
+</section>
+
+<!-- ALBUM -->
+<section class="album-section reveal" id="album">
+  <div class="label">NEW ALBUM</div>
+  <h2 class="album-title">LUMBERJACK TEARS</h2>
+  <div class="album-out">OUT NOW</div>
+  <div class="album-cover-wrap">
+    <img src="lumberjack-tears-cover.jpg" alt="Lumberjack Tears" class="album-cover"
+         onerror="this.src='https://via.placeholder.com/600x600/1a1a1a/666?text=Lumberjack+Tears'">
+  </div>
+  <a class="listen-btn" onclick="showError()">LISTEN</a>
+</section>
+
+<!-- WHO IS MATEO SALAZAR -->
+<section class="bio-section reveal" id="bio">
+  <h2>WHO IS MATEO SALAZAR?</h2>
+  <p>Mateo Salazar, born September 29th, 1993, is an American Internet vocalist, producer, writer, director and performance artist. Mateo Salazar explores the intersection where pop and alternative meet sonically and has arrived where art and entertainment collide visually. From comedy to action sports, mock reality TV drama to WWF wrestling in his live shows, the world of Mateo Salazar is unlike any artist who has come before him.</p>
+  <p>Mateo Salazar has released music since 2016, with 63 albums, EPs, singles, or remixes formally on Spotify, YouTube Music, Apple Music, Amazon Music and now only exclusively on Audiomack. Mateo Salazar's 4th and final album "LUMBERJACK TEARS" comes out on September 24th, 2026 at 12:00am exclusively on Audiomack.</p>
+  <p>A San Antonio, Texas native, Salazar has emerged as a polymath from many different projects and iterations over the last 10 years. As unpredictable as one artist can be, no one can seem to put their finger on what Mateo Salazar will do next. Unafraid to make you laugh, cry, think profoundly or feel completely uncomfortable for the length of a 4 minute music video, he is on the road to developing his own blueprint for packaging and marketing pop culture in the internet era. Versatile in every sense of the word, Salazar not only explores every type of entertainment but also every type of genre in his music alike. The box he puts himself in is limitless. It has no boundaries. Mateo Salazar has built a multimedia project designed to challenge people's perspective of what art is, and he's not the slightest bit concerned what anyone has to say about it!</p>
+  <p class="bio-credit">— Junior Associate Manager</p>
+</section>
+
+<!-- VIDEO -->
+<section class="video-section reveal" id="video">
+  <div class="video-frame">
+    <img id="videoCover" class="video-cover" src="video-red-1.jpg" alt="Video cover"
+         onerror="handleVideoError(this);">
+    <div class="video-error-msg" id="videoErrorMsg" style="display:none;">
+      <span class="error-text">Video Cover Unavailable</span>
+      <span class="error-subtext">Check back for this video soon</span>
+    </div>
+    <div class="play-btn" onclick="openPrivate()"></div>
+  </div>
+  <div class="video-title" id="videoTitle">SUPERMAN (Single)</div>
+  <div class="video-date" id="videoDate">March 10, 2026</div>
+  <a class="watch-btn" onclick="openPrivate()">WATCH NOW</a>
+  <div class="carousel-nav">
+    <button class="nav-arrow" onclick="prevVideo()">◀</button>
+    <button class="nav-arrow" onclick="nextVideo()">▶</button>
+  </div>
+  <div class="nav-dots" id="dots"></div>
+</section>
+
+<!-- PREVIOUS SHOWS -->
+<section class="shows-section reveal" id="shows">
+  <h2>PREVIOUS SHOWS</h2>
+  <div class="show-block"><div class="show-date">AUG 1, 2021</div><div class="show-venue">THE FILLMORE SILVER SPRING<br>SILVER SPRING, MD</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 2, 2021</div><div class="show-venue">FRANKLIN MUSIC HALL<br>PHILADELPHIA, PA</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 4, 2021</div><div class="show-venue">TERMINAL 5<br>NEW YORK, NY</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 5, 2021</div><div class="show-venue">ROADRUNNER<br>BOSTON, MA</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 7, 2021</div><div class="show-venue">HISTORY<br>TORONTO, ON</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 8, 2021</div><div class="show-venue">AGORA THEATRE<br>CLEVELAND, OH</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 9, 2021</div><div class="show-venue">ROYAL OAK MUSIC THEATRE<br>ROYAL OAK, MI</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 11, 2021</div><div class="show-venue">THE SALT SHED<br>CHICAGO, IL</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 12, 2021</div><div class="show-venue">THE FILLMORE MINNEAPOLIS<br>MINNEAPOLIS, MN</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 14, 2021</div><div class="show-venue">BOULDER THEATER<br>BOULDER, CO</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 15, 2021</div><div class="show-venue">THE COMPLEX<br>SALT LAKE CITY, UT</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 17, 2021</div><div class="show-venue">ROSELAND THEATER<br>PORTLAND, OR</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 18, 2021</div><div class="show-venue">SHOWBOX SODO<br>SEATTLE, WA</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 21, 2021</div><div class="show-venue">QUARRY AMPHITHEATER<br>SANTA CRUZ, CA</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 22, 2021</div><div class="show-venue">FOX THEATER<br>OAKLAND, CA</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 23, 2021</div><div class="show-venue">HOLLYWOOD PALLADIUM<br>LOS ANGELES, CA</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 25, 2021</div><div class="show-venue">THE VAN BUREN<br>PHOENIX, AZ</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 27, 2021</div><div class="show-venue">THE BOMB FACTORY<br>DALLAS, TX</div><div class="soldout-btn">SOLD OUT</div></div>
+  <div class="show-block"><div class="show-date">AUG 28, 2021</div><div class="show-venue">STUBB'S WALLER CREEK AMPHITHEATER<br>AUSTIN, TX</div><div class="soldout-btn">SOLD OUT</div></div>
+  <p class="thank-you same-font-small">Thank you to everyone who came out.<br>Follow Mateo Salazar for future dates.</p>
+</section>
+
+<!-- UPCOMING SHOWS -->
+<section class="upcoming-section reveal" id="upcoming">
+  <h2>UPCOMING SHOWS</h2>
+  <p class="no-shows same-font-small">No upcoming shows at this time.<br>Stay tuned for future announcements.</p>
+</section>
+
+<!-- MAIL -->
+<section class="mail-section reveal" id="mail">
+  <h2>JOIN THE<br>MAILING LIST</h2>
+  <form onsubmit="event.preventDefault(); showError();">
+    <input type="email" class="mail-input" placeholder="EMAIL ADDRESS" required>
+    <button type="submit" class="join-btn">JOIN</button>
+    <div class="checkbox-row">
+      <input type="checkbox" id="opt">
+      <label for="opt">I want Warner Music Group to send me marketing messages about Mateo Salazar. Unsubscribe at any time. Please read our Privacy Policy for more information about how we handle your personal information, including for marketing.</label>
+    </div>
+  </form>
+  <div class="foundation-row">
+    <a href="https://mateosalazarny-png.github.io/PROF.-MATEO-SALAZAR-S-OUTRAGEOUSLY-GENEROUS-ART-GRANT-FOR-INDIE-LEGENDS.COM-/" target="_blank" class="foundation-face" title="Prof. Mateo Salazar's Outrageously Generous Art Grant for Indie Legends">
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" stroke="#111" stroke-width="4" fill="#fff"/>
+        <path d="M28 42 Q35 28 50 28 Q65 28 72 42" stroke="#111" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <rect x="32" y="44" width="14" height="8" rx="4" fill="#111"/>
+        <rect x="54" y="44" width="14" height="8" rx="4" fill="#111"/>
+        <path d="M38 68 Q50 76 62 68" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+    </a>
+    <a href="https://mateosalazarny-png.github.io/PROF.-MATEO-SALAZAR-S-OUTRAGEOUSLY-GENEROUS-ART-GRANT-FOR-INDIE-LEGENDS.COM-/" target="_blank" class="foundation-link-text">https://mateosalazarny-png.github.io/PROF.-MATEO-SALAZAR-S-OUTRAGEOUSLY-GENEROUS-ART-GRANT-FOR-INDIE-LEGENDS.COM-/</a>
+    <a href="https://mateosalazarny-png.github.io/PROF.-MATEO-SALAZAR-S-OUTRAGEOUSLY-GENEROUS-ART-GRANT-FOR-INDIE-LEGENDS.COM-/" target="_blank" class="foundation-face" title="Prof. Mateo Salazar's Outrageously Generous Art Grant for Indie Legends">
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" stroke="#111" stroke-width="4" fill="#fff"/>
+        <path d="M28 42 Q35 28 50 28 Q65 28 72 42" stroke="#111" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <rect x="32" y="44" width="14" height="8" rx="4" fill="#111"/>
+        <rect x="54" y="44" width="14" height="8" rx="4" fill="#111"/>
+        <path d="M38 68 Q50 76 62 68" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="socials">
+    <a onclick="showError()">f</a>
+    <a onclick="showError()">𝕏</a>
+    <a onclick="showError()">ig</a>
+    <a onclick="showError()">▶</a>
+    <a onclick="showError()">♫</a>
+  </div>
+  <div class="footer-links">
+    <a onclick="showError()">PRIVACY</a> |
+    <a onclick="showError()">TERMS</a> |
+    <a onclick="showError()">COOKIES</a>
+  </div>
+  <p style="margin-top:22px;font-size:11px;color:#444;">© 2026 MATEO SALAZAR</p>
+</footer>
+
+<!-- ========== COOKIE BAR ========== -->
+<div class="cookie-bar" id="cookieBar">
+  <div class="cookie-bar-text">
+    <strong>THIS WEBSITE USES COOKIES</strong><br>
+    Sony Music Entertainment ("Sony Music") processes your personal information to measure and improve Sony Music websites and services, to assist our marketing campaigns, and to provide personalized content and advertising. We also share information about your use of our site with our social media, advertising and analytics partners. By continuing to use this website or by closing this box, you are indicating your consent to our use of those cookies. For more information see our <a href="#" onclick="event.preventDefault();">Privacy Policy</a>.
+  </div>
+  <div class="cookie-bar-actions">
+    <button class="cookie-agree-btn" onclick="openSignup()">I AGREE</button>
+    <button class="cookie-close-x" id="cookieCloseX" onclick="hideCookieBar()" title="Close">×</button>
+  </div>
+</div>
+
+<!-- ========== SIGN UP MODAL ========== -->
+<div class="signup-overlay" id="signupOverlay">
+  <div class="signup-modal" id="signupModal">
+    <button class="signup-close" onclick="hideSignup()" title="Close">×</button>
+
+    <div class="signup-logo-row">
+      <div class="signup-face">
+        <svg viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="46" stroke="#111" stroke-width="4" fill="#fff"/>
+          <path d="M28 42 Q35 28 50 28 Q65 28 72 42" stroke="#111" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <rect x="32" y="44" width="14" height="8" rx="4" fill="#111"/>
+          <rect x="54" y="44" width="14" height="8" rx="4" fill="#111"/>
+          <path d="M38 68 Q50 76 62 68" stroke="#111" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
       </div>
-      <div class="merch-item">
-        <div class="vinyl-record">
-          <div class="record-label-center label-wanderer">THE<br>WANDERER</div>
-        </div>
-        <div class="merch-title">The Wanderer</div>
-        <div class="merch-price">$29.99</div>
-        <button class="buy-btn">BUY VINYL</button>
-      </div>
-      <div class="merch-item">
-        <div class="vinyl-record">
-          <div class="record-label-center label-antarctica">ANTARCTICA<br>OST</div>
-        </div>
-        <div class="merch-title">Antarctica (Original Score)</div>
-        <div class="merch-price">$39.99</div>
-        <button class="buy-btn">BUY VINYL</button>
-      </div>
-      <div class="merch-item">
-        <div class="vinyl-record">
-          <div class="record-label-center label-salazar-ep">SALAZAR<br>EP</div>
-        </div>
-        <div class="merch-title">Salazar (EP)</div>
-        <div class="merch-price">$24.99</div>
-        <button class="buy-btn">BUY VINYL</button>
-      </div>
-      <div class="merch-item">
-        <div class="vinyl-record">
-          <div class="record-label-center label-forest-fires">FOREST<br>FIRES</div>
-        </div>
-        <div class="merch-title">Forest Fires</div>
-        <div class="merch-price">$32.99</div>
-        <button class="buy-btn">BUY VINYL</button>
-      </div>
-      <div class="merch-item">
-        <div class="vinyl-record">
-          <div class="record-label-center label-acoustic">ACOUSTIC<br>SESSIONS</div>
-        </div>
-        <div class="merch-title">Acoustic Sessions Vol.1</div>
-        <div class="merch-price">$27.99</div>
-        <button class="buy-btn">BUY VINYL</button>
-      </div>
+      <div class="signup-r">®</div>
     </div>
 
-    <!-- UPCOMING SHOWS -->
-    <h2 class="section-title">🎤 UPCOMING SHOWS</h2>
-    <div class="shows-container">
-      <table class="shows-table">
-        <tr><td class="date">Aug 1, 2024</td><td class="venue">The Fillmore Silver Spring</td><td class="city">Silver Spring, MD</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 2, 2024</td><td class="venue">Franklin Music Hall</td><td class="city">Philadelphia, PA</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 4, 2024</td><td class="venue">Terminal 5</td><td class="city">New York, NY</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 5, 2024</td><td class="venue">Roadrunner</td><td class="city">Boston, MA</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 7, 2024</td><td class="venue">HISTORY</td><td class="city">Toronto, ON</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 8, 2024</td><td class="venue">Agora Theatre</td><td class="city">Cleveland, OH</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 9, 2024</td><td class="venue">Royal Oak Music Theatre</td><td class="city">Royal Oak, MI</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 11, 2024</td><td class="venue">The Salt Shed</td><td class="city">Chicago, IL</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 12, 2024</td><td class="venue">The Fillmore Minneapolis</td><td class="city">Minneapolis, MN</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 14, 2024</td><td class="venue">Boulder Theater</td><td class="city">Boulder, CO</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 15, 2024</td><td class="venue">The Complex</td><td class="city">Salt Lake City, UT</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 17, 2024</td><td class="venue">Roseland Theater</td><td class="city">Portland, OR</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 18, 2024</td><td class="venue">Showbox SoDo</td><td class="city">Seattle, WA</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 21, 2024</td><td class="venue">Quarry Amphitheater</td><td class="city">Santa Cruz, CA</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 22, 2024</td><td class="venue">Fox Theater</td><td class="city">Oakland, CA</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 23, 2024</td><td class="venue">Hollywood Palladium</td><td class="city">Los Angeles, CA</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 25, 2024</td><td class="venue">The Van Buren</td><td class="city">Phoenix, AZ</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 27, 2024</td><td class="venue">The Bomb Factory</td><td class="city">Dallas, TX</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Aug 28, 2024</td><td class="venue">Stubb's Waller Creek Amphitheater</td><td class="city">Austin, TX</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 5, 2024</td><td class="venue">Paradiso</td><td class="city">Amsterdam, Netherlands</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 6, 2024</td><td class="venue">Cirque Royal</td><td class="city">Brussels, Belgium</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 8, 2024</td><td class="venue">Carlswerk Victoria</td><td class="city">Cologne, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 9, 2024</td><td class="venue">Bataclan</td><td class="city">Paris, France</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 10, 2024</td><td class="venue">Komplex 457</td><td class="city">Zürich, Switzerland</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 12, 2024</td><td class="venue">TonHalle München</td><td class="city">Munich, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 13, 2024</td><td class="venue">Astra Kulturhaus</td><td class="city">Berlin, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 14, 2024</td><td class="venue">Docks</td><td class="city">Hamburg, Germany</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 16, 2024</td><td class="venue">Store VEGA</td><td class="city">Copenhagen, Denmark</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 18, 2024</td><td class="venue">Progresja</td><td class="city">Warsaw, Poland</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 19, 2024</td><td class="venue">STARS Auditorium</td><td class="city">Bratislava, Slovakia</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 21, 2024</td><td class="venue">Quantic Club</td><td class="city">Bucharest, Romania</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 22, 2024</td><td class="venue">Pirotska 5 Event Center</td><td class="city">Sofia, Bulgaria</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 24, 2024</td><td class="venue">SWG3 TV Studio</td><td class="city">Glasgow, UK</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 25, 2024</td><td class="venue">O2 Ritz Manchester</td><td class="city">Manchester, UK</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Sep 27, 2024</td><td class="venue">O2 Forum Kentish Town</td><td class="city">London, UK</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Oct 2, 2024</td><td class="venue">Fortitude Music Hall</td><td class="city">Brisbane, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Oct 3, 2024</td><td class="venue">Forum Melbourne</td><td class="city">Melbourne, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Oct 6, 2024</td><td class="venue">Auckland Town Hall</td><td class="city">Auckland, New Zealand</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Oct 7, 2024</td><td class="venue">Enmore Theatre</td><td class="city">Sydney, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Oct 8, 2024</td><td class="venue">Hindley Street Music Hall</td><td class="city">Adelaide, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Oct 10, 2024</td><td class="venue">Metro City</td><td class="city">Perth, Australia</td><td><button class="ticket-btn">Tickets</button></td></tr>
-        <tr><td class="date">Oct 14, 2024</td><td class="venue">VENUE TBA</td><td class="city">Chengdu, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-        <tr><td class="date">Oct 16, 2024</td><td class="venue">VENUE TBA</td><td class="city">Chongqing, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-        <tr><td class="date">Oct 17, 2024</td><td class="venue">VENUE TBA</td><td class="city">Guangzhou, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-        <tr><td class="date">Oct 18, 2024</td><td class="venue">VENUE TBA</td><td class="city">Shenzhen, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-        <tr><td class="date">Oct 21, 2024</td><td class="venue">VENUE TBA</td><td class="city">Wuhan, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-        <tr><td class="date">Oct 23, 2024</td><td class="venue">VENUE TBA</td><td class="city">Shanghai, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-        <tr><td class="date">Oct 24, 2024</td><td class="venue">VENUE TBA</td><td class="city">Hangzhou, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-        <tr><td class="date">Oct 25, 2024</td><td class="venue">VENUE TBA</td><td class="city">Beijing, China</td><td><button class="rsvp-btn">RSVP</button></td></tr>
-      </table>
-      <p class="shows-note">Get notified when new events are announced in your area<br>Follow Mateo Salazar</p>
-    </div>
+    <h2 class="signup-title">SIGN UP FOR UPDATES</h2>
 
-    <!-- JOIN THE MAILING LIST -->
-    <div class="mailing-section">
-      <h3 style="margin-bottom:20px; letter-spacing:0.1em;">Join The Mailing List</h3>
-      <input type="email" placeholder="EMAIL ADDRESS">
-      <button class="join-btn">Sign Up</button>
-      <p class="mailing-disclaimer">I want Warner Music Group to send me marketing messages about Mateo Salazar. Unsubscribe at any time. Please read our Privacy Policy for more information about how we handle your personal information, including for marketing.</p>
+    <div id="signupFormContent">
+      <div class="signup-form-group">
+        <label class="signup-label">Email Address*</label>
+        <input type="email" id="signupEmail" class="signup-input" placeholder="Your email address" required>
+        <div class="email-error" id="emailError">Please enter a valid email (e.g., name@gmail.com)</div>
+      </div>
+      <div class="signup-form-group">
+        <label class="signup-label">First Name*</label>
+        <input type="text" id="signupFirstName" class="signup-input" placeholder="Your first name" required>
+      </div>
+      <div class="signup-form-group">
+        <label class="signup-label">Country</label>
+        <select id="signupCountry" class="signup-select">
+          <option value="">Your country</option>
+          <option value="Afghanistan">Afghanistan</option>
+          <option value="United States" selected>United States</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Canada">Canada</option>
+          <option value="Germany">Germany</option>
+          <option value="Australia">Australia</option>
+          <option value="Japan">Japan</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Brazil">Brazil</option>
+          <option value="France">France</option>
+        </select>
+      </div>
+
+      <button class="signup-subscribe" onclick="submitSignup()">
+        <span class="arrow">→</span>
+        <span>SUBSCRIBE</span>
+      </button>
+
+      <p class="signup-agreement">
+        By subscribing I agree to receive marketing messaging from Mateo Salazar and Sony Music
+      </p>
     </div>
   </div>
+</div>
 
-  <div class="footer">© SALAZAR RECORDS — SEPTEMBER 24, 2026</div>
+<div class="private-overlay" id="privateOverlay">
+  <div class="private-msg">This is a private music video / short film</div>
+  <div class="private-play" onclick="showError()"></div>
+  <button class="private-close" onclick="closePrivate()">Close</button>
+</div>
 
-  <script>
-    const canvas = document.getElementById('skyCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height, stars = [], clouds = [], ufo = { x: 0, y: 0 };
+<div class="error-overlay" id="errorOverlay">
+  <div class="error-box">
+    <div class="icon">⟳</div>
+    <h3>Connection Unstable</h3>
+    <p>Unable to reach the server right now.<br>Please try again later.</p>
+    <button onclick="hideError()">Dismiss</button>
+  </div>
+</div>
 
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      generateStars();
-      generateClouds();
-      ufo.x = width * 0.7;
-      ufo.y = height * 0.2;
+<script>
+  const cursor = document.getElementById('cursor');
+  const trail = document.getElementById('cursorTrail');
+  let mx=0, my=0, tx=0, ty=0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx+'px'; cursor.style.top = my+'px';
+  });
+  (function anim(){
+    tx += (mx-tx)*0.16; ty += (my-ty)*0.16;
+    trail.style.left = tx+'px'; trail.style.top = ty+'px';
+    requestAnimationFrame(anim);
+  })();
+
+  const sc = document.getElementById('stars');
+  for(let i=0;i<55;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2.6+1;
+    s.style.width = size+'px'; s.style.height = size+'px';
+    s.style.top = Math.random()*100+'%';
+    s.style.left = Math.random()*100+'%';
+    s.style.setProperty('--d', (Math.random()*4+2)+'s');
+    s.style.animationDelay = Math.random()*6+'s';
+    sc.appendChild(s);
+  }
+
+  function handleVideoError(img) {
+    img.style.display = 'none';
+    const errorMsg = document.getElementById('videoErrorMsg');
+    if (errorMsg) { errorMsg.style.display = 'block'; }
+  }
+
+  function scrollToSection(id) {
+    const target = document.getElementById(id);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
     }
+  }
 
-    function generateStars() {
-      stars = [];
-      const count = Math.floor((width * height) / 2500);
-      for (let i = 0; i < count; i++) {
-        stars.push({
-          x: Math.random() * width,
-          y: Math.random() * height * 0.75,
-          radius: Math.random() * 2.2 + 0.5,
-          twinkleSpeed: Math.random() * 0.02 + 0.005,
-          twinkleOffset: Math.random() * Math.PI * 2,
-          opacity: Math.random() * 0.8 + 0.4
-        });
+  const scrollToTopBtn = document.getElementById('scrollToTop');
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    createRipple(scrollToTopBtn);
+  }
+
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    document.getElementById('progressBar').style.width = pct+'%';
+    if (window.scrollY > 400) { scrollToTopBtn.classList.add('visible'); }
+    else { scrollToTopBtn.classList.remove('visible'); }
+    updateActiveSectionDot();
+  });
+
+  function createRipple(element) {
+    const rect = element.getBoundingClientRect();
+    const ripple = document.createElement('div');
+    ripple.className = 'click-ripple';
+    ripple.style.left = rect.left + rect.width/2 + 'px';
+    ripple.style.top = rect.top + rect.height/2 + 'px';
+    ripple.style.background = 'rgba(155,126,217,0.6)';
+    document.body.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+  }
+
+  document.addEventListener('click', function(e) {
+    const ripple = document.createElement('div');
+    ripple.className = 'click-ripple';
+    ripple.style.left = e.clientX + 'px';
+    ripple.style.top = e.clientY + 'px';
+    ripple.style.background = 'rgba(255,255,255,0.15)';
+    document.body.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+  });
+
+  const sectionNavDots = document.querySelectorAll('.section-nav-dot');
+  const sections = [
+    document.getElementById('hero'), document.getElementById('album'),
+    document.getElementById('bio'), document.getElementById('video'),
+    document.getElementById('shows'), document.getElementById('upcoming'),
+    document.getElementById('mail')
+  ];
+
+  function updateActiveSectionDot() {
+    let currentSection = 0;
+    sections.forEach((section, index) => {
+      if (section) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= window.innerHeight/2) { currentSection = index; }
       }
-    }
+    });
+    sectionNavDots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentSection);
+    });
+  }
 
-    function generateClouds() {
-      clouds = [];
-      const count = Math.floor(width / 120) + 3;
-      for (let i = 0; i < count; i++) {
-        clouds.push({
-          x: Math.random() * width,
-          y: Math.random() * height * 0.7 + height * 0.05,
-          width: Math.random() * 200 + 100,
-          height: Math.random() * 60 + 30,
-          speed: Math.random() * 0.3 + 0.08,
-          opacity: Math.random() * 0.4 + 0.2
-        });
+  sectionNavDots.forEach(dot => {
+    dot.addEventListener('click', function() {
+      const targetId = this.getAttribute('data-target');
+      const target = document.getElementById(targetId);
+      if (target) { target.scrollIntoView({ behavior: 'smooth' }); createRipple(this); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') { prevVideo(); }
+    else if (e.key === 'ArrowRight') { nextVideo(); }
+    else if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, {threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  const videos = [
+    { title: "SUPERMAN (Single)", date: "March 10, 2026", image: "video-red-1.jpg" },
+    { title: "ROADTRIP (Single)", date: "April 8, 2026", image: "video-red-2.jpg" },
+    { title: "BOUQUET (Single)", date: "July 20, 2026", image: "video-white.jpg" },
+    { title: "STINK BELOW (Single)", date: "August 27, 2026", image: "video-purple.jpg" },
+    { title: "Everything You Ever Hoped For (Single)", date: "September 10, 2026", image: "" }
+  ];
+  let current = 0;
+
+  function updateVideo() {
+    const v = videos[current];
+    document.getElementById('videoTitle').textContent = v.title;
+    document.getElementById('videoDate').textContent = v.date;
+    const img = document.getElementById('videoCover');
+    const errorMsg = document.getElementById('videoErrorMsg');
+    if (errorMsg) { errorMsg.style.display = 'none'; }
+    if (v.image) {
+      img.src = v.image; img.style.display = 'block'; img.style.background = '#1a1a1a';
+    } else {
+      img.src = ''; img.style.display = 'none'; img.style.background = '#0a0a0a'; img.alt = 'Video cover';
+      if (errorMsg) { errorMsg.style.display = 'block'; }
+    }
+  }
+
+  function nextVideo() { current = (current+1) % videos.length; updateVideo(); }
+  function prevVideo() { current = (current-1+videos.length) % videos.length; updateVideo(); }
+
+  const dotsContainer = document.getElementById('dots');
+  videos.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i===0 ? ' active' : '');
+    dot.onclick = () => { current = i; updateVideo(); };
+    dotsContainer.appendChild(dot);
+  });
+
+  function openPrivate() { document.getElementById('privateOverlay').classList.add('show'); }
+  function closePrivate() { document.getElementById('privateOverlay').classList.remove('show'); }
+  function showError(){ document.getElementById('errorOverlay').classList.add('show'); }
+  function hideError(){ document.getElementById('errorOverlay').classList.remove('show'); }
+  document.getElementById('errorOverlay').addEventListener('click', e => {
+    if(e.target === e.currentTarget) hideError();
+  });
+
+  // ========== COOKIE + SIGNUP + BLUR ==========
+  function hideCookieBar() { document.getElementById('cookieBar').style.display = 'none'; }
+  function openSignup() { document.getElementById('signupOverlay').classList.add('show'); }
+  function hideSignup() { document.getElementById('signupOverlay').classList.remove('show'); }
+
+  function removeBlur() {
+    document.body.classList.remove('blurred');
+    document.getElementById('blurOverlay').classList.add('hidden');
+  }
+
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function submitSignup() {
+    const emailInput = document.getElementById('signupEmail');
+    const email = emailInput.value.trim();
+    const firstName = document.getElementById('signupFirstName').value.trim();
+    const errorEl = document.getElementById('emailError');
+
+    errorEl.classList.remove('show');
+    emailInput.classList.remove('error');
+
+    if (!email || !firstName) {
+      if (!email) {
+        errorEl.textContent = 'Please enter your email address';
+        errorEl.classList.add('show');
+        emailInput.classList.add('error');
       }
+      if (!firstName) {
+        alert('Please enter your first name');
+      }
+      return;
     }
 
-    function drawStars(time) {
-      stars.forEach(star => {
-        const twinkle = Math.sin(time * star.twinkleSpeed + star.twinkleOffset) * 0.4 + 0.6;
-        const alpha = star.opacity * twinkle;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 250, 220, ${alpha})`;
-        ctx.fill();
-        if (star.radius > 1.4) {
-          ctx.beginPath();
-          ctx.arc(star.x,
+    if (!email.includes('@')) {
+      errorEl.textContent = 'Email must contain an @ symbol (e.g., name@gmail.com)';
+      errorEl.classList.add('show');
+      emailInput.classList.add('error');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      errorEl.textContent = 'Please enter a complete email address (e.g., name@gmail.com)';
+      errorEl.classList.add('show');
+      emailInput.classList.add('error');
+      return;
+    }
+
+    const content = document.getElementById('signupFormContent');
+    content.innerHTML = `
+      <div class="signup-success">
+        <h3>Thank you!</h3>
+        <p>You're all set. You'll receive updates from Mateo Salazar and Sony Music.</p>
+      </div>
+    `;
+    setTimeout(() => {
+      hideSignup();
+      hideCookieBar();
+      removeBlur();
+    }, 2200);
+  }
+
+  document.getElementById('signupEmail').addEventListener('input', function() {
+    this.classList.remove('error');
+    document.getElementById('emailError').classList.remove('show');
+  });
+
+  setTimeout(() => {
+    document.getElementById('cookieCloseX').classList.add('visible');
+  }, 60000);
+
+  updateActiveSectionDot();
+</script>
+</body>
+</html>
